@@ -1,0 +1,79 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const brand = {
+name: "Program First",
+tagline: "Measure what drives winning",
+primary: "#0f172a"
+};
+
+const questions = [
+"Coaches clearly communicate the team’s vision and expectations.",
+"I understand how my effort helps the team succeed.",
+"Coaches hold athletes accountable on and off the field.",
+"Team members respect one another.",
+"Coaches and players create a positive environment.",
+"I enjoy being part of this team.",
+"I work to improve my skills year-round.",
+"My work ethic meets team expectations.",
+"Being on this team helps me make good decisions.",
+"Coaches are fair and consistent.",
+"Coaches listen to athletes.",
+"Leaders model expected behavior.",
+"My role on the team is important.",
+"I feel valued on this team.",
+"I am proud to be a member of this team.",
+"Coaches explain plays and strategies clearly.",
+"We adjust plans during games.",
+"Practices prepare us to compete.",
+"Coaches help me learn from mistakes.",
+"I feel confident in my abilities.",
+"Our team supports one another.",
+"Our team is respected by the community.",
+"I am proud to represent my school.",
+"Team traditions build unity and pride."
+];
+
+export default function ProgramFirstSurvey() {
+const [responses, setResponses] = useState(Array(questions.length).fill(null));
+
+const handleChange = (index, value) => {
+const updated = [...responses];
+updated[index] = value;
+setResponses(updated);
+};
+
+const handleSubmit = () => {
+alert("Thank you for completing the Program First Team Culture Assessment.");
+console.log(responses);
+};
+
+return ( <div className="p-6 max-w-3xl mx-auto"> <h1 className="text-3xl font-bold mb-1">{brand.name}</h1> <p className="text-sm text-gray-500 mb-6">{brand.tagline}</p> <p className="mb-6">This survey is anonymous. Please answer honestly.</p>
+
+```
+  {questions.map((q, i) => (
+    <Card key={i} className="mb-4">
+      <CardContent className="p-4">
+        <p className="mb-3 font-medium">{i + 1}. {q}</p>
+        <div className="flex gap-3 flex-wrap">
+          {[1, 2, 3].map(val => (
+            <Button
+              key={val}
+              variant={responses[i] === val ? "default" : "outline"}
+              onClick={() => handleChange(i, val)}
+            >
+              {val === 1 ? "Disagree" : val === 2 ? "Neutral" : "Agree"}
+            </Button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  ))}
+
+  <Button className="mt-6 w-full" onClick={handleSubmit}>Submit Assessment</Button>
+</div>
+```
+
+);
+}
