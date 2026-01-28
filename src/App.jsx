@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 // ✅ Put your Google Apps Script Web App URL here (must end with /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzV-cLCkmiJXXEN6bY5eW4CRrCyMH-zdCLrSMV3_0ILKeCQqiWK1BgXVWvHoMzcKrNM/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaSbS42YOLrOye_MtpiFcwiLnaxSg9yvJhptARpJFU-MoOBijnjxEW_dRevQsZ2FDx/exec";
 
 const QUESTIONS = [
   "Coaches clearly communicate the team’s vision and expectations.",
