@@ -28,7 +28,7 @@ const QUESTIONS = [
 ];
 
 export default function App() {
-  // 🔒 One stable slot per question
+  // One response slot per question
   const [responses, setResponses] = useState(
     () => QUESTIONS.map(() => null)
   );
@@ -39,6 +39,28 @@ export default function App() {
       copy[questionIndex] = value;
       return copy;
     });
+  };
+
+  // ✅ THIS IS WHERE THE GOOGLE SHEETS SUBMIT LOGIC GOES
+  const handleSubmit = async () => {
+    if (responses.includes(null)) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+
+    await fetch("PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        school: "Demo High School",
+        team: "Varsity",
+        responses: responses
+      })
+    });
+
+    alert("Thank you for completing the Program First Team Culture Assessment.");
   };
 
   return (
@@ -90,6 +112,26 @@ export default function App() {
           </div>
         </div>
       ))}
+
+      {/* ✅ SUBMIT BUTTON CONNECTED TO handleSubmit */}
+      <button
+        type="button"
+        onClick={handleSubmit}
+        style={{
+          width: "100%",
+          marginTop: 20,
+          padding: "14px 16px",
+          borderRadius: 10,
+          border: "none",
+          background: "#000",
+          color: "#fff",
+          fontSize: 16,
+          fontWeight: 700,
+          cursor: "pointer"
+        }}
+      >
+        Submit Assessment
+      </button>
     </div>
   );
 }
