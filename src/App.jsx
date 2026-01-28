@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 
-// ✅ Put your Google Apps Script Web App URL here (must end with /exec)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4AM6nR42fn4-eJu5Uvh1yM-9CU5lUDZNabD5u14RGsuor3Pd1X_rN_FdHd6CUkF4P/exec";
+// ✅ Your live Google Apps Script Web App URL (must end with /exec)
+const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbz4AM6nR42fn4-eJu5Uvh1yM-9CU5lUDZNabD5u14RGsuor3Pd1X_rN_FdHd6CUkF4P/exec";
 
 const QUESTIONS = [
   "Coaches clearly communicate the team’s vision and expectations.",
@@ -37,12 +38,12 @@ const CHOICES = [
 ];
 
 export default function App() {
-  // ✅ one response slot per question
+  // ✅ One response slot per question
   const [responses, setResponses] = useState(() => QUESTIONS.map(() => null));
 
-  // Optional: you can hardcode these for now, or later replace with a dropdown / text input
-  const [school, setSchool] = useState("Demo High School");
-  const [team, setTeam] = useState("Varsity");
+  // ✅ Optional labels for consulting / multi-team rollout
+  const [school, setSchool] = useState("");
+  const [team, setTeam] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,15 +61,13 @@ export default function App() {
   };
 
   const handleSubmit = async () => {
-    // Safety checks
     if (responses.includes(null)) {
       alert(`Please answer all questions (${answeredCount}/${QUESTIONS.length}).`);
       return;
     }
-    if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR")) {
-      alert(
-        "Missing Google Script URL.\n\nIn src/App.jsx, replace GOOGLE_SCRIPT_URL with your Apps Script Web App URL (ends with /exec)."
-      );
+
+    if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.includes("script.google.com/macros/s/")) {
+      alert("Google Script URL is missing or invalid.");
       return;
     }
 
@@ -78,7 +77,6 @@ export default function App() {
       const res = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Note: Apps Script doPost reads e.postData.contents
         body: JSON.stringify({
           school,
           team,
@@ -86,7 +84,6 @@ export default function App() {
         }),
       });
 
-      // Some Apps Script deployments return 200 with empty body, so we don't rely on JSON parsing
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(`Submit failed (${res.status}). ${text}`);
@@ -94,12 +91,15 @@ export default function App() {
 
       alert("Submitted! Thank you for completing the Program First assessment.");
 
-      // Optional: clear after submit
+      // Optional: Clear answers after successful submission
       setResponses(QUESTIONS.map(() => null));
+      // Optional: Clear labels too
+      // setSchool("");
+      // setTeam("");
     } catch (err) {
       console.error(err);
       alert(
-        "Submission failed.\n\nCommon causes:\n• Apps Script URL is wrong\n• Apps Script is not deployed as a Web App (Anyone access)\n• You didn't redeploy after changes\n\nCheck the browser console for details."
+        "Submission failed.\n\nCommon causes:\n• Apps Script not deployed as Web app (Anyone access)\n• You edited the script but didn’t redeploy a new version\n• Browser cached an old deployment\n\nCheck the browser console for details."
       );
     } finally {
       setIsSubmitting(false);
@@ -116,22 +116,25 @@ export default function App() {
         </div>
       </header>
 
-      {/* Optional: simple fields so your Google Sheet has labels */}
+      {/* ✅ Optional labels for easier sorting in Google Sheets */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <label style={{ fontSize: 12, color: "#555" }}>School</label>
+          <label style={{ fontSize: 12, color: "#555" }}>School (optional)</label>
           <input
             value={school}
             onChange={(e) => setSchool(e.target.value)}
+            placeholder="e.g., Vincennes Lincoln"
             style={{ padding: 10, borderRadius: 10, border: "1px solid #ccc", minWidth: 260 }}
           />
         </div>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <label style={{ fontSize: 12, color: "#555" }}>Team</label>
+          <label style={{ fontSize: 12, color: "#555" }}>Team (optional)</label>
           <input
             value={team}
             onChange={(e) => setTeam(e.target.value)}
-            style={{ padding: 10, borderRadius: 10, border: "1px solid #ccc", minWidth: 180 }}
+            placeholder="e.g., Varsity Boys Basketball"
+            style={{ padding: 10, borderRadius: 10, border: "1px solid #ccc", minWidth: 260 }}
           />
         </div>
       </div>
@@ -179,4 +182,27 @@ export default function App() {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={isSubmitt
+        disabled={isSubmitting}
+        style={{
+          width: "100%",
+          marginTop: 10,
+          padding: "14px 16px",
+          borderRadius: 12,
+          border: "none",
+          background: isSubmitting ? "#6b7280" : "#111827",
+          color: "white",
+          fontWeight: 800,
+          cursor: isSubmitting ? "not-allowed" : "pointer",
+          fontSize: 16,
+        }}
+      >
+        {isSubmitting ? "Submitting..." : "Submit Assessment"}
+      </button>
+
+      <p style={{ marginTop: 10, fontSize: 12, color: "#555" }}>
+        If submission fails, confirm Apps Script is deployed as a Web App with access set to “Anyone”
+        and that the URL ends with <code>/exec</code>.
+      </p>
+    </div>
+  );
+}
