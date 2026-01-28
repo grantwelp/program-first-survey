@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-// ✅ Your live Google Apps Script Web App URL (must end with /exec)
+// ✅ Your live Google Apps Script Web App URL
 const GOOGLE_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz4AM6nR42fn4-eJu5Uvh1yM-9CU5lUDZNabD5u14RGsuor3Pd1X_rN_FdHd6CUkF4P/exec";
 
@@ -38,10 +38,10 @@ const CHOICES = [
 ];
 
 export default function App() {
-  // ✅ One response slot per question
+  // One response slot per question
   const [responses, setResponses] = useState(() => QUESTIONS.map(() => null));
 
-  // ✅ Optional labels for consulting / multi-team rollout
+  // Optional identifiers (useful for consulting)
   const [school, setSchool] = useState("");
   const [team, setTeam] = useState("");
 
@@ -66,17 +66,15 @@ export default function App() {
       return;
     }
 
-    if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.includes("script.google.com/macros/s/")) {
-      alert("Google Script URL is missing or invalid.");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       const res = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // ✅ CORS-safe for Google Apps Script
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body: JSON.stringify({
           school,
           team,
@@ -85,21 +83,19 @@ export default function App() {
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`Submit failed (${res.status}). ${text}`);
+        throw new Error(`Request failed with status ${res.status}`);
       }
 
       alert("Submitted! Thank you for completing the Program First assessment.");
 
-      // Optional: Clear answers after successful submission
+      // Optional reset
       setResponses(QUESTIONS.map(() => null));
-      // Optional: Clear labels too
       // setSchool("");
       // setTeam("");
     } catch (err) {
       console.error(err);
       alert(
-        "Submission failed.\n\nCommon causes:\n• Apps Script not deployed as Web app (Anyone access)\n• You edited the script but didn’t redeploy a new version\n• Browser cached an old deployment\n\nCheck the browser console for details."
+        "Submission failed.\n\nMost common reasons:\n• Apps Script not deployed as Web App (Anyone access)\n• Script edited but not redeployed as a NEW version\n• Old browser cache\n\nOpen DevTools → Console for details."
       );
     } finally {
       setIsSubmitting(false);
@@ -116,7 +112,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* ✅ Optional labels for easier sorting in Google Sheets */}
+      {/* Optional identifiers */}
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <label style={{ fontSize: 12, color: "#555" }}>School (optional)</label>
@@ -198,11 +194,6 @@ export default function App() {
       >
         {isSubmitting ? "Submitting..." : "Submit Assessment"}
       </button>
-
-      <p style={{ marginTop: 10, fontSize: 12, color: "#555" }}>
-        If submission fails, confirm Apps Script is deployed as a Web App with access set to “Anyone”
-        and that the URL ends with <code>/exec</code>.
-      </p>
     </div>
   );
 }
