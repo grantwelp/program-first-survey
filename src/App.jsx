@@ -1,9 +1,4 @@
-import { useMemo, useState } from "react";
-
-const BRAND = {
-  name: "Program First",
-  tagline: "Measure what drives winning",
-};
+import { useState } from "react";
 
 const QUESTIONS = [
   "Coaches clearly communicate the team’s vision and expectations.",
@@ -29,52 +24,72 @@ const QUESTIONS = [
   "Our team supports one another.",
   "Our team is respected by the community.",
   "I am proud to represent my school.",
-  "Team traditions build unity and pride.",
-];
-
-const CHOICES = [
-  { value: 1, label: "Disagree" },
-  { value: 2, label: "Neutral" },
-  { value: 3, label: "Agree" },
+  "Team traditions build unity and pride."
 ];
 
 export default function App() {
-  // ✅ One response slot per question
-  const [responses, setResponses] = useState(() => Array(QUESTIONS.length).fill(null));
-
-  const answeredCount = useMemo(
-    () => responses.filter((r) => r !== null).length,
-    [responses]
+  // 🔒 One stable slot per question
+  const [responses, setResponses] = useState(
+    () => QUESTIONS.map(() => null)
   );
 
-  const setResponse = (index, value) => {
-    setResponses((prev) => {
-      const next = [...prev];
-      next[index] = value; // ✅ only updates that question’s value
-      return next;
+  const selectAnswer = (questionIndex, value) => {
+    setResponses(prev => {
+      const copy = [...prev];
+      copy[questionIndex] = value;
+      return copy;
     });
   };
 
-  const handleSubmit = () => {
-    // Optional: prevent submit until complete
-    if (answeredCount !== QUESTIONS.length) {
-      alert(`Please answer all questions (${answeredCount}/${QUESTIONS.length} answered).`);
-      return;
-    }
-
-    // For now we just show success + log
-    console.log("Responses:", responses);
-    alert("Thank you for completing the Program First Team Culture Assessment.");
-  };
-
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: 20, fontFamily: "system-ui, Arial" }}>
-      <header style={{ marginBottom: 18 }}>
-        <h1 style={{ margin: 0 }}>{BRAND.name}</h1>
-        <div style={{ color: "#555", marginTop: 4 }}>{BRAND.tagline}</div>
-        <div style={{ marginTop: 10, color: "#333" }}>
-          Anonymous survey • {answeredCount}/{QUESTIONS.length} answered
-        </div>
-      </header>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: 24 }}>
+      <h1>Program First</h1>
+      <p><em>Measure what drives winning</em></p>
+      <p>Anonymous survey. Please answer honestly.</p>
 
-      {QUESTIONS.map((q, i) => (
+      {QUESTIONS.map((question, i) => (
+        <div
+          key={i}
+          style={{
+            border: "1px solid #ddd",
+            borderRadius: 10,
+            padding: 16,
+            marginBottom: 14
+          }}
+        >
+          <strong>{i + 1}. {question}</strong>
+
+          <div style={{ marginTop: 10, display: "flex", gap: 10 }}>
+            {[1, 2, 3].map(value => {
+              const label =
+                value === 1 ? "Disagree" :
+                value === 2 ? "Neutral" :
+                "Agree";
+
+              const selected = responses[i] === value;
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => selectAnswer(i, value)}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 8,
+                    border: selected ? "2px solid #000" : "1px solid #ccc",
+                    background: selected ? "#000" : "#fff",
+                    color: selected ? "#fff" : "#000",
+                    fontWeight: 600,
+                    cursor: "pointer"
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
