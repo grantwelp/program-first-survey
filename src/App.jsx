@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-const questions = [
+const BRAND = {
+  name: "Program First",
+  tagline: "Measure what drives winning",
+};
+
+const QUESTIONS = [
   "Coaches clearly communicate the team’s vision and expectations.",
   "I understand how my effort helps the team succeed.",
   "Coaches hold athletes accountable on and off the field.",
@@ -24,41 +29,52 @@ const questions = [
   "Our team supports one another.",
   "Our team is respected by the community.",
   "I am proud to represent my school.",
-  "Team traditions build unity and pride."
+  "Team traditions build unity and pride.",
+];
+
+const CHOICES = [
+  { value: 1, label: "Disagree" },
+  { value: 2, label: "Neutral" },
+  { value: 3, label: "Agree" },
 ];
 
 export default function App() {
-  const [responses, setResponses] = useState(Array(questions.length).fill(null));
+  // ✅ One response slot per question
+  const [responses, setResponses] = useState(() => Array(QUESTIONS.length).fill(null));
+
+  const answeredCount = useMemo(
+    () => responses.filter((r) => r !== null).length,
+    [responses]
+  );
 
   const setResponse = (index, value) => {
-    const updated = [...responses];
-    updated[index] = value;
-    setResponses(updated);
+    setResponses((prev) => {
+      const next = [...prev];
+      next[index] = value; // ✅ only updates that question’s value
+      return next;
+    });
   };
 
   const handleSubmit = () => {
+    // Optional: prevent submit until complete
+    if (answeredCount !== QUESTIONS.length) {
+      alert(`Please answer all questions (${answeredCount}/${QUESTIONS.length} answered).`);
+      return;
+    }
+
+    // For now we just show success + log
+    console.log("Responses:", responses);
     alert("Thank you for completing the Program First Team Culture Assessment.");
-    console.log(responses);
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: "auto", padding: 20 }}>
-      <h1>Program First</h1>
-      <p><em>Measure what drives winning</em></p>
-      <p>This survey is anonymous. Please answer honestly.</p>
-
-      {questions.map((q, i) => (
-        <div key={i} style={{ marginBottom: 20 }}>
-          <strong>{i + 1}. {q}</strong>
-          <div style={{ marginTop: 10 }}>
-            <button onClick={() => setResponse(i, 1)}>Disagree</button>{" "}
-            <button onClick={() => setResponse(i, 2)}>Neutral</button>{" "}
-            <button onClick={() => setResponse(i, 3)}>Agree</button>
-          </div>
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: 20, fontFamily: "system-ui, Arial" }}>
+      <header style={{ marginBottom: 18 }}>
+        <h1 style={{ margin: 0 }}>{BRAND.name}</h1>
+        <div style={{ color: "#555", marginTop: 4 }}>{BRAND.tagline}</div>
+        <div style={{ marginTop: 10, color: "#333" }}>
+          Anonymous survey • {answeredCount}/{QUESTIONS.length} answered
         </div>
-      ))}
+      </header>
 
-      <button onClick={handleSubmit}>Submit Assessment</button>
-    </div>
-  );
-}
+      {QUESTIONS.map((q, i) => (
